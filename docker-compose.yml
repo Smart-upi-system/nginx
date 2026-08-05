@@ -1,0 +1,27 @@
+version: "3.9"
+
+# ── Standalone reverse proxy (DMZ edge) ──────────────────────────────────
+# Runs nginx on its own against the ALREADY-RUNNING UPI microservices stack.
+# It attaches to the pre-existing `internal_net` network (created by the
+# Smart-Upi-Deployment compose file) so it can reach the api-gateway.
+# nginx is the only service that exposes a port to the host (:8080); the
+# backend services stay internal-only.
+#
+# Usage (while the main stack is running):
+#   docker compose -f ngnix/docker-compose.yml up -d --build
+#
+# All traffic arrives on host port 8080 and is proxied to api-gateway:4000.
+
+services:
+  nginx:
+    build: .
+    container_name: nginx-reverse-proxy
+    ports:
+      - "8080:8080"
+    networks:
+      - internal_net
+    restart: always
+
+networks:
+  internal_net:
+    external: true
